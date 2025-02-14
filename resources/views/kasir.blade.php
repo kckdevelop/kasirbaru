@@ -20,8 +20,8 @@
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    
-    
+
+
     <style>
         .btn-orange {
             background-color: #fd7e14;
@@ -33,7 +33,7 @@
             color: white;
         }
     </style>
-    
+
 </head>
 
 <body class="bg-light">
@@ -70,7 +70,7 @@
                         <label>No. Nota</label>
                         <input type="text" class="form-control" id="nota" value="{{ $NoNota }}" readonly>
                     </div>
-                    
+
                 </div>
 
             </div>
@@ -132,7 +132,7 @@
         <!-- Summary -->
         <div class="row">
             <div class="col-8">
-                
+
             </div>
             <div class="col-4">
                 <div class="card">
@@ -156,7 +156,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         <hr>
                         <div class="d-flex justify-content-between font-weight-bold mb-2">
                             <span>Kembalian</span>
@@ -167,15 +167,14 @@
 
                 <div class="d-flex justify-content-between mt-3">
                     <button class="btn btn-orange" id="reset">Reset Form</button>
-                    
+
                     <button class="btn btn-success" id="tombolsimpan">Simpan Transaksi</button>
 
-                    
+
                 </div>
             </div>
         </div>
     </div>
-
 
     <!-- The Modal -->
     <div class="modal" id="myModal">
@@ -229,13 +228,17 @@
 
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <input type="hidden" name="kasirtanggal" id="kasir-tanggal" value="">
-                        <input type="hidden" name="kasirnota" id="kasir-nota" value="">
-                        <input type="hidden" name="kasiridpelanggan" id="kasir-idpelanggan" value="">
-                        <input type="hidden" name="kasirtotal" id="kasir-total" value="">
-                        <input type="hidden" name="kasirbayar" id="kasir-bayar" value="">
-                        <input type="hidden" name="kasirkembalian" id="kasir-kembalian" value="">
-                        <button type="submit" class="btn btn-success">Simpan</button>
+                        <form action="/kasir/simpan" method="POST">
+                            @csrf
+                            <input type="hidden" name="kasirtanggal" id="kasir-tanggal" value="">
+                            <input type="hidden" name="kasirnota" id="kasir-nota" value="">
+                            <input type="hidden" name="kasiridpelanggan" id="kasir-idpelanggan" value="">
+                            <input type="hidden" name="kasirtotal" id="kasir-total" value="">
+                            <input type="hidden" name="kasirbayar" id="kasir-bayar" value="">
+                            <input type="hidden" name="kasirkembalian" id="kasir-kembalian" value="">
+                            <input type="hidden" name="kasirproduk" id="kasir-produk" value="">
+                            <button type="submit" class="btn btn-success">Simpan</button>
+                        </form>
                     </div>
                 </form>
             </div>
@@ -325,6 +328,7 @@
                     existingProduct.qty += 1;
                 } else {
                     products.push({
+                        id: produk.id,
                         kode: produk.KodeProduk,
                         nama: produk.NamaProduk,
                         harga: produk.Harga,
@@ -362,13 +366,10 @@
                     var dibayar = document.querySelector('input[name="dibayar"]').value
                     var kembalian = document.querySelector('#change').textContent
 
-
-
                     document.getElementById('totalbayar').textContent = totalbayar;
                     document.getElementById('simpantanggal').textContent = tanggal;
                     document.getElementById('jumlahuang').textContent = 'Rp. ' + dibayar;
                     document.getElementById('simpankembalian').textContent = kembalian;
-
 
                     document.getElementById('kasir-tanggal').value = tanggal;
                     document.getElementById('kasir-idpelanggan').value = pelanggan;
@@ -376,47 +377,46 @@
                     document.getElementById('kasir-total').value = totalbayar;
                     document.getElementById('kasir-bayar').value = dibayar;
                     document.getElementById('kasir-kembalian').value = kembalian;
+                    document.getElementById('kasir-produk').value = JSON.stringify(products);
 
                 }
             });
 
         });
     </script>
-<script>
-    //message with toastr
-    @if(session()->has('success'))
-    alert('Transaksi Berhasil Disimpan');
-    products = [];
+    <script>
+        //message with toastr
+        @if (session()->has('success'))
+            alert('Transaksi Berhasil Disimpan');
+            products = [];
             localStorage.setItem('products', JSON.stringify(products));
             renderProducts(products);
             document.querySelector('input[name="barcode"]').value = '';
             document.querySelector('input[name="dibayar"]').value = '';
             document.querySelector('#change').textContent = 'Rp. 0';
-            document.querySelector('input[name="barcode"]').focus(); 
+            document.querySelector('input[name="barcode"]').focus();
+        @elseif (session()->has('error'))
 
-    @elseif(session()->has('error'))
+            alert('Transaksi Gagal');
+        @endif
+    </script>
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    alert('Transaksi Gagal');
-        
-    @endif
-</script>
-<!-- Bootstrap core JavaScript-->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
-<!-- Core plugin JavaScript-->
-<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js"></script>
 
-<!-- Custom scripts for all pages-->
-<script src="js/sb-admin-2.min.js"></script>
+    <!-- Page level plugins -->
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/demo/datatables-demo.js"></script>
 
-<!-- Page level plugins -->
-<script src="vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-<script src="js/demo/datatables-demo.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Bootstrap 4 JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

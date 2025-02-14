@@ -16,30 +16,27 @@ class KasirController extends Controller
         $produks = Produk::get();
         $penjualans = Penjualan::get();
         $total_penjualan = penjualan::count();
-        
-        
-        if(empty($total_penjualan))
-        {
-            $notas = "1000001";
-        }
-        else
-        {
-            $notasakhir = Penjualan::orderBy('id','DESC')->first()->NoNota;
-            $notas = $notasakhir+1;
 
+
+        if (empty($total_penjualan)) {
+            $notas = "1000001";
+        } else {
+            $notasakhir = Penjualan::orderBy('id', 'DESC')->first()->NoNota;
+            $notas = $notasakhir + 1;
         }
         return view('kasir', [
             'pelanggans' => $pelanggans,
             'produks' => $produks,
-            'penjualans'=>$penjualans,
-            'NoNota' =>$notas,
+            'penjualans' => $penjualans,
+            'NoNota' => $notas,
         ]);
     }
 
     public function simpan(Request $request)
     {
-        
-        $request ->validate([
+
+        $produks = json_decode($request->kasirproduk);
+        $request->validate([
             'kasirtanggal' => 'required',
             'kasirnota' => 'required',
             'kasiridpelanggan' => 'required',
@@ -49,17 +46,24 @@ class KasirController extends Controller
         ]);
         // dd($request);
         //ubah format
-        $totalbelanja = hapusformat( $request->kasirtotal);
-        $totalbayar = hapusformat( $request->kasirbayar);
-        $kembalian = hapusformat( $request->kasirkembalian);
-        Penjualan::create([
+        $totalbelanja = hapusformat($request->kasirtotal);
+        $totalbayar = hapusformat($request->kasirbayar);
+        $kembalian = hapusformat($request->kasirkembalian);
+        $penjualan = Penjualan::create([
             'NoNota' => $request->kasirnota,
             'TanggalPenjualan' => $request->kasirtanggal,
-            'TotalHarga' =>$totalbelanja,
-            'TotalBayar' =>$totalbayar,
+            'TotalHarga' => $totalbelanja,
+            'TotalBayar' => $totalbayar,
             'Kembalian' => $kembalian,
             'pelanggan_id' => $request->kasiridpelanggan,
         ]);
+        $penjualan->detailPenjualans()->createMany(
+            array_map(fn($produk) => [
+                'produk_id' => $produk->id,
+                'JumlahProduk' => $produk->qty,
+                'JumlahTotal' => $produk->qty * $produk->harga,
+            ], $produks)
+        );
 
         return redirect()->route('kasir')->with('success', 'Transaksi berhasil ditambahkan!');
     }
