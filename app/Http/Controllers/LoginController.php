@@ -21,7 +21,8 @@ class LoginController extends Controller
         ],[
             'email.required' => 'Email Tidak Boleh Kosong!',
             'email.email' => 'Format Email Tidak Benar!',
-            'email.required' => 'Password Tidak Boleh Kosong!',
+            'password.required' => 'Password Tidak Boleh Kosong!',
+            'massage'=> 'Username atau Password Salah',
         ]);
 
         if(Auth::attempt($credential)){
