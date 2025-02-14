@@ -6,16 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetailPenjualan extends Model
 {
-    protected $table = 'detailpenjualan';
 
-    protected $primaryKey = 'id_detail';
+    protected $primaryKey = 'idDetail';
 
-    protected $fillable = [
-        'id_penjualan', 'id_produk', 'jumlah_produk', 'subtotal'
-    ];
+    protected $fillable = ['produk_id', 'JumlahProduk', 'JumlahTotal', 'penjualan_id'];
+
 
     public function produk()
-{
-    return $this->belongsTo(Produk::class, 'id_produk', 'id_produk');
-}
+    {
+        return $this->belongsTo(Produk::class, 'produk_id', 'produk_id');
+    }
 }
